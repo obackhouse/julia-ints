@@ -17,17 +17,17 @@ function _int1e_nuc_integral(ab::ContractedGaussianPair, atoms::Vector{Tuple{Str
     lb, mb, nb = ab.b.lmn
     Lab = la + ma + na + lb + mb + nb
 
-    mtp = ones(Lab+1, ab.a.size, ab.b.size)
+    mtp = ones(ab.a.size, ab.b.size, Lab+1)
     vne = zeros(ab.a.size, ab.b.size)
 
     for n in 2:Lab+1
-        mtp[n,:,:] = view(mtp, n-1, :, :) .* (-2.0 * ab.p)
+        mtp[:,:,n] = view(mtp, :, :, n-1) .* (-2.0 * ab.p)
     end
     
     for k = 1:length(atoms)
         coords = atoms[k][2]
-        FnT = zeros(Lab+1, ab.a.size, ab.b.size)
-        PC = zeros(3, ab.a.size, ab.b.size)
+        FnT = zeros(ab.a.size, ab.b.size, Lab+1)
+        PC = zeros(ab.a.size, ab.b.size, 3)
         T = zeros(ab.a.size, ab.b.size)
 
         @tullio PC[i,j,x] = ab.P[i,j,x] - coords[x]
@@ -35,7 +35,7 @@ function _int1e_nuc_integral(ab::ContractedGaussianPair, atoms::Vector{Tuple{Str
 
         for i = 1:ab.a.size
             for j = 1:ab.b.size
-                boys_array!(Lab, T[i,j], view(FnT, :, i, j))
+                boys_array!(Lab, T[i,j], view(FnT, i, j, :))
             end
         end
 

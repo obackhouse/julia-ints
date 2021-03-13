@@ -11,7 +11,7 @@ function base(t, u, v, n, PC, FnT)
     # R      = (-2 p)  F (T)
     #  0,0,0            n
 
-    Rtuv = FnT[n+1,..]
+    Rtuv = FnT[.., n+1]
 
     Rtuv
 end
@@ -22,7 +22,7 @@ function oob(t, u, v, n, PC, FnT)
     # R      = 0.0  if t<0 or u<0 or v<0
     #  t,u,v   
 
-    Rtuv = zero(size(view(FnT, 1, ..)))
+    Rtuv = zero(size(view(FnT, .., 1)))
 
     Rtuv
 end
