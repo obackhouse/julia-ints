@@ -13,21 +13,24 @@ function _int1e_ovlp_integral(ab::ContractedGaussianPair)
     @views begin
         sx = expansion(
                 la, lb, 0, 
-                ab.KAB[1,:,:], 
-                ab.PA[1,:,:], ab.PB[1,:,:], 
-                ab.p[:,:], ab.q[:,:]
+                ab.KAB[:,:,1], 
+                ab.PA[:,:,1], 
+                ab.PB[:,:,1], 
+                ab.p, ab.q,
         )
         sy = expansion(
                 ma, mb, 0, 
-                ab.KAB[2,:,:], 
-                ab.PA[2,:,:], ab.PB[2,:,:], 
-                ab.p[:,:], ab.q[:,:]
+                ab.KAB[:,:,2], 
+                ab.PA[:,:,2], 
+                ab.PB[:,:,2], 
+                ab.p, ab.q,
         )
         sz = expansion(
                 na, nb, 0, 
-                ab.KAB[3,:,:], 
-                ab.PA[3,:,:], ab.PB[3,:,:], 
-                ab.p[:,:], ab.q[:,:]
+                ab.KAB[:,:,3], 
+                ab.PA[:,:,3], 
+                ab.PB[:,:,3], 
+                ab.p, ab.q,
         )
     end
 

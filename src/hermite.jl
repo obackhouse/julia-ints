@@ -33,7 +33,7 @@ function vertical_t(t, u, v, n, PC, FnT)
     # R      = (t-1) R        + X   R
     #  t,u,v          t-2,u,v    PC  t-1,u,v
 
-    Rtuv = hermite(t-1, u, v, n+1, PC, FnT) .* view(PC, 1, ..)
+    Rtuv = hermite(t-1, u, v, n+1, PC, FnT) .* view(PC, .., 1)
     if t > 1
         Rtuv = Rtuv .+ hermite(t-2, u, v, n+1, PC, FnT) * (t-1)
     end
@@ -47,7 +47,7 @@ function vertical_u(t, u, v, n, PC, FnT)
     # R      = (u-1) R        + Y   R
     #  t,u,v          t,u-2,v    PC  t,u-1,v
 
-    Rtuv = hermite(t, u-1, v, n+1, PC, FnT) .* view(PC, 2, ..)
+    Rtuv = hermite(t, u-1, v, n+1, PC, FnT) .* view(PC, .., 2)
     if u > 1
         Rtuv = Rtuv .+ hermite(t, u-2, v, n+1, PC, FnT) * (u-1)
     end
@@ -61,7 +61,7 @@ function vertical_v(t, u, v, n, PC, FnT)
     # R      = (v-1) R        + Z   R
     #  t,u,v          t,u,v-2    PC  t,u,v-1
     
-    Rtuv = hermite(t, u, v-1, n+1, PC, FnT) .* view(PC, 3, ..)
+    Rtuv = hermite(t, u, v-1, n+1, PC, FnT) .* view(PC, .., 3)
     if v > 1
         Rtuv = Rtuv .+ hermite(t, u, v-2, n+1, PC, FnT) * (v-1)
     end

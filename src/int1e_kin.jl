@@ -14,64 +14,73 @@ function _int1e_kin_integral(ab::ContractedGaussianPair)
     @views begin
         sx = expansion(
                 la, lb, 0, 
-                ab.KAB[1,:,:], 
-                ab.PA[1,:,:], ab.PB[1,:,:], 
-                ab.p[:,:], ab.q[:,:]
+                ab.KAB[:,:,1], 
+                ab.PA[:,:,1], 
+                ab.PB[:,:,1], 
+                ab.p, ab.q
         )
         sy = expansion(
                 ma, mb, 0, 
-                ab.KAB[2,:,:], 
-                ab.PA[2,:,:], ab.PB[2,:,:], 
-                ab.p[:,:], ab.q[:,:]
+                ab.KAB[:,:,2], 
+                ab.PA[:,:,2], 
+                ab.PB[:,:,2], 
+                ab.p, ab.q
         )
         sz = expansion(
                 na, nb, 0, 
-                ab.KAB[3,:,:], 
-                ab.PA[3,:,:], ab.PB[3,:,:], 
-                ab.p[:,:], ab.q[:,:]
+                ab.KAB[:,:,3], 
+                ab.PA[:,:,3], 
+                ab.PB[:,:,3], 
+                ab.p, ab.q
         )
 
         tx = expansion(
                 la, lb+2, 0, 
-                ab.KAB[1,:,:], 
-                ab.PA[1,:,:], ab.PB[1,:,:], 
-                ab.p[:,:], ab.q[:,:]
+                ab.KAB[:,:,1], 
+                ab.PA[:,:,1],
+                ab.PB[:,:,1], 
+                ab.p, ab.q
         )
         ty = expansion(
                 ma, mb+2, 0, 
-                ab.KAB[2,:,:], 
-                ab.PA[2,:,:], ab.PB[2,:,:], 
-                ab.p[:,:], ab.q[:,:]
+                ab.KAB[:,:,2], 
+                ab.PA[:,:,2], 
+                ab.PB[:,:,2], 
+                ab.p, ab.q
         )
         tz = expansion(
                 na, nb+2, 0, 
-                ab.KAB[3,:,:], 
-                ab.PA[3,:,:], ab.PB[3,:,:], 
-                ab.p[:,:], ab.q[:,:]
+                ab.KAB[:,:,3], 
+                ab.PA[:,:,3], 
+                ab.PB[:,:,3], 
+                ab.p, ab.q
         )
 
         if lb > 1
             dx = expansion(
                     la, lb-2, 0, 
-                    ab.KAB[1,:,:], 
-                    ab.PA[1,:,:], ab.PB[1,:,:], 
-                    ab.p[:,:], ab.q[:,:]
+                    ab.KAB[:,:,1], 
+                    ab.PA[:,:,1], 
+                    ab.PB[:,:,1], 
+                    ab.p, ab.q
             )
         end
         if mb > 1
             dy = expansion(
                     ma, mb-2, 0, 
-                    ab.KAB[2,:,:], 
-                    ab.PA[2,:,:], ab.PB[2,:,:], 
-                    ab.p[:,:], ab.q[:,:]
+                    ab.KAB[:,:,2], 
+                    ab.PA[:,:,2], 
+                    ab.PB[:,:,2], 
+                    ab.p, ab.q
             )
         end
         if nb > 1
             dz = expansion(
                     na, nb-2, 0, 
-                    ab.KAB[3,:,:], 
-                    ab.PA[3,:,:], ab.PB[3,:,:], 
-                    ab.p[:,:], ab.q[:,:]
+                    ab.KAB[:,:,3], 
+                    ab.PA[:,:,3], 
+                    ab.PB[:,:,3], 
+                    ab.p, ab.q
             )
         end
     end

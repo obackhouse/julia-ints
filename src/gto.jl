@@ -120,20 +120,22 @@ function build_pairs(gaussians::AbstractVector{ContractedGaussian})
             q = 1.0 ./ (2.0 * p)
             D = (a.c .* a.N) .* (b.c .* b.N)'
 
-            P = Array{Float64}(undef, 3, na, nb)
-            PA = Array{Float64}(undef, 3, na, nb)
-            PB = Array{Float64}(undef, 3, na, nb)
-            AB = Array{Float64}(undef, 3, na, nb)
-            KAB = Array{Float64}(undef, 3, na, nb)
+            P = Array{Float64}(undef, na, nb, 3)
+            PA = Array{Float64}(undef, na, nb, 3)
+            PB = Array{Float64}(undef, na, nb, 3)
+            AB = Array{Float64}(undef, na, nb, 3)
+            KAB = Array{Float64}(undef, na, nb, 3)
 
-            for k = 1:na
-                for l = 1:nb
-                    P[:,k,l] .= (α[k] * A .+ β[l] * B) ./ p[k,l]
-                    PA[:,k,l] .= P[:,k,l] .- A
-                    PB[:,k,l] .= P[:,k,l] .- B
-                    AB[:,k,l] .= A .- B
-                    ζ = α[k] * β[l] / p[k,l]
-                    KAB[:,k,l] .= exp.(-ζ .* AB[:,k,l].^2)
+            @views begin
+                for k = 1:na
+                    for l = 1:nb
+                        P[k,l,:] .= (α[k] * A .+ β[l] * B) ./ p[k,l]
+                        PA[k,l,:] .= P[k,l,:] .- A
+                        PB[k,l,:] .= P[k,l,:] .- B
+                        AB[k,l,:] .= A .- B
+                        ζ = α[k] * β[l] / p[k,l]
+                        KAB[k,l,:] .= exp.(-ζ .* AB[k,l,:].^2)
+                    end
                 end
             end
 

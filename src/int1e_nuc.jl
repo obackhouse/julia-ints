@@ -30,8 +30,8 @@ function _int1e_nuc_integral(ab::ContractedGaussianPair, atoms::Vector{Tuple{Str
         PC = zeros(3, ab.a.size, ab.b.size)
         T = zeros(ab.a.size, ab.b.size)
 
-        @tullio PC[x,i,j] = ab.P[x,i,j] - coords[x]
-        @tullio T[i,j] = ab.p[i,j] * PC[x,i,j] * PC[x,i,j]
+        @tullio PC[i,j,x] = ab.P[i,j,x] - coords[x]
+        @tullio T[i,j] = ab.p[i,j] * PC[i,j,x] * PC[i,j,x]
 
         for i = 1:ab.a.size
             for j = 1:ab.b.size
@@ -45,27 +45,27 @@ function _int1e_nuc_integral(ab::ContractedGaussianPair, atoms::Vector{Tuple{Str
             for t = 0:la+lb
                 Et = expansion(
                         la, lb, t, 
-                        ab.KAB[1,:,:],
-                        ab.PA[1,:,:],
-                        ab.PB[1,:,:],
+                        ab.KAB[:,:,1],
+                        ab.PA[:,:,1],
+                        ab.PB[:,:,1],
                         ab.p, ab.q,
                 )
 
                 for u = 0:ma+mb
                     Eu = expansion(
                             ma, mb, u, 
-                            ab.KAB[2,:,:],
-                            ab.PA[2,:,:],
-                            ab.PB[2,:,:],
+                            ab.KAB[:,:,2],
+                            ab.PA[:,:,2],
+                            ab.PB[:,:,2],
                             ab.p, ab.q,
                     )
 
                     for v = 0:na+nb
                         Ev = expansion(
                                 na, nb, v, 
-                                ab.KAB[3,:,:],
-                                ab.PA[3,:,:],
-                                ab.PB[3,:,:],
+                                ab.KAB[:,:,3],
+                                ab.PA[:,:,3],
+                                ab.PB[:,:,3],
                                 ab.p, ab.q,
                         )
                         Rtuv = hermite(t, u, v, 0, PC, FnT)
