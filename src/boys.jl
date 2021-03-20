@@ -26,7 +26,7 @@ function boys(n::Int64, T::Float64)
         
         dT = (idx - T * BOYS_RESOLUTION) * (1.0 / BOYS_RESOLUTION)
         fac = 1.0
-        FnT = 0.0
+        FnT = boys_fn_data[n+1][idx+1]
 
         for i = 1:(BOYS_INTERP_NUM-1)
             fac *= (dT / i)

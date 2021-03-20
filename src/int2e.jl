@@ -8,6 +8,33 @@ include("boys.jl")
 include("hermite.jl")
 
 
+function _int2e_integral_ssss(ab::ContractedGaussianPair, cd::ContractedGaussianPair)
+    # Two-electron integral between four contracted s-type GTOs
+    
+    vee = 0.0
+
+    for i = 1:ab.a.size
+        for j = 1:ab.b.size
+            for k = 1:cd.a.size
+                for l = 1:cd.b.size
+                    p_times_q = ab.p[i,j] * cd.p[k,l]
+                    p_plus_q = ab.p[i,j] + cd.p[k,l]
+                    PQ = view(ab.P, i, j, :) .- view(cd.P, k, l, :)
+                    T = (p_times_q / p_plus_q) * sum(PQ .* PQ)
+                    FnT = boys(0, T)
+
+                    vee += ab.D[i,j] * cd.D[k,l] * FnT / (p_times_q * p_plus_q^0.5) *
+                           ab.KAB[i,j,1] * ab.KAB[i,j,2] * ab.KAB[i,j,3] *
+                           cd.KAB[k,l,1] * cd.KAB[k,l,2] * cd.KAB[k,l,3]
+                end
+            end
+        end
+    end
+
+    vee * 2.0 * π^2.5
+end
+
+
 function _int2e_integral(ab::ContractedGaussianPair, cd::ContractedGaussianPair, with_cache=false)
     # Two-electron integral between four contracted GTOs
 
@@ -19,6 +46,10 @@ function _int2e_integral(ab::ContractedGaussianPair, cd::ContractedGaussianPair,
     Lab = la + ma + na + lb + mb + nb
     Lcd = lc + mc + nc + ld + md + nd
     Labcd = Lab + Lcd
+
+    if Labcd == 0
+        return _int2e_integral_ssss(ab, cd)
+    end
 
     μ2 = ones(Labcd+1)
     FnT = zeros(Labcd+1)
