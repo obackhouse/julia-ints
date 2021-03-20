@@ -10,7 +10,7 @@ include("boys.jl")
 include("hermite.jl")
 
 
-function _int2e_integral(ab::ContractedGaussianPair, cd::ContractedGaussianPair)
+function _int2e_integral(ab::ContractedGaussianPair, cd::ContractedGaussianPair, with_cache=false)
     # Two-electron integral between four contracted GTOs
 
     vee = 0.0
@@ -47,6 +47,17 @@ function _int2e_integral(ab::ContractedGaussianPair, cd::ContractedGaussianPair)
                     boys_array!(Labcd, T, FnT)
                     FnT .= FnT .* μ2
 
+                    if with_cache
+                        cache_t = Dict()
+                        cache_u = Dict()
+                        cache_v = Dict()
+                        cache_w = Dict()
+                        cache_x = Dict()
+                        cache_y = Dict()
+                    else
+                        cache_t = cache_u = cache_v = cache_w = cache_x = cache_y = nothing
+                    end
+
                     for w = 0:lc+ld
                         Ew = expansion(
                                 lc, ld, w,
@@ -55,6 +66,7 @@ function _int2e_integral(ab::ContractedGaussianPair, cd::ContractedGaussianPair)
                                 cd.PB[k,l,1],
                                 cd.p[k,l], 
                                 cd.q[k,l],
+                                cache_w,
                         )
 
                         for x = 0:mc+md
@@ -65,6 +77,7 @@ function _int2e_integral(ab::ContractedGaussianPair, cd::ContractedGaussianPair)
                                     cd.PB[k,l,2],
                                     cd.p[k,l], 
                                     cd.q[k,l],
+                                    cache_x,
                             )
                             Ewx = Ew * Ex
 
@@ -76,6 +89,7 @@ function _int2e_integral(ab::ContractedGaussianPair, cd::ContractedGaussianPair)
                                         cd.PB[k,l,3],
                                         cd.p[k,l], 
                                         cd.q[k,l],
+                                        cache_y,
                                 )
                                 Ewxy = Ewx * Ey * ((-1)^(w+x+y))
 
@@ -87,6 +101,7 @@ function _int2e_integral(ab::ContractedGaussianPair, cd::ContractedGaussianPair)
                                             ab.PB[i,j,1],
                                             ab.p[i,j],
                                             ab.q[i,j],
+                                            cache_t,
                                     )
                                     Etwxy = Et * Ewxy
 
@@ -98,6 +113,7 @@ function _int2e_integral(ab::ContractedGaussianPair, cd::ContractedGaussianPair)
                                                 ab.PB[i,j,2],
                                                 ab.p[i,j],
                                                 ab.q[i,j],
+                                                cache_u,
                                         )
                                         Etuwxy = Etwxy * Eu
 
@@ -109,6 +125,7 @@ function _int2e_integral(ab::ContractedGaussianPair, cd::ContractedGaussianPair)
                                                     ab.PB[i,j,3],
                                                     ab.p[i,j],
                                                     ab.q[i,j],
+                                                    cache_v,
                                             )
                                             Rtuvwxy = hermite(t+w, u+x, v+y, 0, PQ, FnT)
                                             vee_ij += Etuwxy * Ev * Rtuvwxy
