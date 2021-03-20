@@ -7,37 +7,42 @@ include("expansion.jl")
 function _int1e_ovlp_integral(ab::ContractedGaussianPair)
     # Overlap integral between two contracted GTOs
     
+    s = 0.0
     la, ma, na = ab.a.lmn
     lb, mb, nb = ab.b.lmn
 
-    @views begin
-        sx = expansion(
-                la, lb, 0, 
-                ab.KAB[:,:,1], 
-                ab.PA[:,:,1], 
-                ab.PB[:,:,1], 
-                ab.p, ab.q,
-        )
-        sy = expansion(
-                ma, mb, 0, 
-                ab.KAB[:,:,2], 
-                ab.PA[:,:,2], 
-                ab.PB[:,:,2], 
-                ab.p, ab.q,
-        )
-        sz = expansion(
-                na, nb, 0, 
-                ab.KAB[:,:,3], 
-                ab.PA[:,:,3], 
-                ab.PB[:,:,3], 
-                ab.p, ab.q,
-        )
+    for i = 1:ab.a.size
+        for j = 1:ab.b.size
+            sx = expansion(
+                    la, lb, 0, 
+                    ab.KAB[i,j,1], 
+                    ab.PA[i,j,1], 
+                    ab.PB[i,j,1], 
+                    ab.p[i,j], 
+                    ab.q[i,j],
+            )
+            sy = expansion(
+                    ma, mb, 0, 
+                    ab.KAB[i,j,2], 
+                    ab.PA[i,j,2], 
+                    ab.PB[i,j,2], 
+                    ab.p[i,j], 
+                    ab.q[i,j],
+            )
+            sz = expansion(
+                    na, nb, 0, 
+                    ab.KAB[i,j,3], 
+                    ab.PA[i,j,3], 
+                    ab.PB[i,j,3], 
+                    ab.p[i,j], 
+                    ab.q[i,j],
+            )
+
+            s += ab.D[i,j] * ab.q[i,j]^1.5 * sx * sy * sz
+        end
     end
 
-    s = ab.D .* ab.q.^1.5 .* sx .* sy .* sz
-    s = (2.0 * π)^1.5 * sum(s)
-
-    s
+    s * (2.0 * π)^1.5
 end
 
 

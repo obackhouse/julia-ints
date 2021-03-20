@@ -16,70 +16,67 @@ function _int1e_nuc_integral(ab::ContractedGaussianPair, atoms::Vector{Tuple{Str
     lb, mb, nb = ab.b.lmn
     Lab = la + ma + na + lb + mb + nb
 
-    mtp = ones(ab.a.size, ab.b.size, Lab+1)
-    vne = zeros(ab.a.size, ab.b.size)
+    for i = 1:ab.a.size
+        for j = 1:ab.b.size
+            vne_ij = 0.0
+            mtp = ones(Lab+1)
 
-    for n in 2:Lab+1
-        mtp[:,:,n] = view(mtp, :, :, n-1) .* (-2.0 * ab.p)
-    end
-    
-    for k = 1:length(atoms)
-        coords = atoms[k][2]
-        FnT = zeros(ab.a.size, ab.b.size, Lab+1)
-        PC = zeros(ab.a.size, ab.b.size, 3)
-        T = zeros(ab.a.size, ab.b.size)
-
-        @tullio PC[i,j,x] = ab.P[i,j,x] - coords[x]
-        @tullio T[i,j] = ab.p[i,j] * PC[i,j,x] * PC[i,j,x]
-
-        for i = 1:ab.a.size
-            for j = 1:ab.b.size
-                boys_array!(Lab, T[i,j], view(FnT, i, j, :))
+            for n in 2:Lab+1
+                mtp[n] = mtp[n-1] * (-2.0 * ab.p[i,j])
             end
-        end
+            
+            for k = 1:length(atoms)
+                FnT = zeros(Lab+1)
+                PC = view(ab.P, i, j, :) - atoms[k][2]
+                T = ab.p[i,j] * sum(PC .* PC)
 
-        FnT .= FnT .* mtp
+                boys_array!(Lab, T, FnT)
+                FnT .= FnT .* mtp
 
-        @views begin
-            for t = 0:la+lb
-                Et = expansion(
-                        la, lb, t, 
-                        ab.KAB[:,:,1],
-                        ab.PA[:,:,1],
-                        ab.PB[:,:,1],
-                        ab.p, ab.q,
-                )
-
-                for u = 0:ma+mb
-                    Eu = expansion(
-                            ma, mb, u, 
-                            ab.KAB[:,:,2],
-                            ab.PA[:,:,2],
-                            ab.PB[:,:,2],
-                            ab.p, ab.q,
-                    )
-
-                    for v = 0:na+nb
-                        Ev = expansion(
-                                na, nb, v, 
-                                ab.KAB[:,:,3],
-                                ab.PA[:,:,3],
-                                ab.PB[:,:,3],
-                                ab.p, ab.q,
+                @views begin
+                    for t = 0:la+lb
+                        Et = expansion(
+                                la, lb, t, 
+                                ab.KAB[i,j,1],
+                                ab.PA[i,j,1],
+                                ab.PB[i,j,1],
+                                ab.p[i,j], 
+                                ab.q[i,j],
                         )
-                        Rtuv = hermite(t, u, v, 0, PC, FnT)
 
-                        vne .+= charges[k] * Et .* Eu .* Ev .* Rtuv
+                        for u = 0:ma+mb
+                            Eu = expansion(
+                                    ma, mb, u, 
+                                    ab.KAB[i,j,2],
+                                    ab.PA[i,j,2],
+                                    ab.PB[i,j,2],
+                                    ab.p[i,j], 
+                                    ab.q[i,j],
+                            )
+
+                            for v = 0:na+nb
+                                Ev = expansion(
+                                        na, nb, v, 
+                                        ab.KAB[i,j,3],
+                                        ab.PA[i,j,3],
+                                        ab.PB[i,j,3],
+                                        ab.p[i,j], 
+                                        ab.q[i,j],
+                                )
+                                Rtuv = hermite(t, u, v, 0, PC, FnT)
+
+                                vne_ij += charges[k] * Et * Eu * Ev * Rtuv
+                            end
+                        end
                     end
                 end
             end
+
+            vne += ab.D[i,j] * ab.q[i,j] * vne_ij
         end
     end
 
-    vne = ab.D .* ab.q .* vne
-    vne = -4.0 * π * sum(vne)
-
-    vne
+    vne * -4.0 * π
 end
 
 
