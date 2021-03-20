@@ -34,8 +34,8 @@ function mcmurchie_davidson_i(i, j, t, KAB, PA, PB, p, q, cache=nothing)
     # E    = ----- E      + X   E      + (t+1) E
     #  t      2*p   t-1      PA  t              t+1
 
-    Eab = expansion(i-1, j, t-1, KAB, PA, PB, p, q, cache) .* q .+
-          expansion(i-1, j, t,   KAB, PA, PB, p, q, cache) .* PA .+
+    Eab = expansion(i-1, j, t-1, KAB, PA, PB, p, q, cache) * q +
+          expansion(i-1, j, t,   KAB, PA, PB, p, q, cache) * PA +
           expansion(i-1, j, t+1, KAB, PA, PB, p, q, cache) * (t+1)
 
     Eab
@@ -47,8 +47,8 @@ function mcmurchie_davidson_j(i, j, t, KAB, PA, PB, p, q, cache=nothing)
     # E    = ----- E      + X   E      + (t+1) E
     #  t      2*p   t-1      PA  t              t+1
 
-    Eab = expansion(i, j-1, t-1, KAB, PA, PB, p, q, cache) .* q .+
-          expansion(i, j-1, t,   KAB, PA, PB, p, q, cache) .* PB .+
+    Eab = expansion(i, j-1, t-1, KAB, PA, PB, p, q, cache) * q +
+          expansion(i, j-1, t,   KAB, PA, PB, p, q, cache) * PB +
           expansion(i, j-1, t+1, KAB, PA, PB, p, q, cache) * (t+1)
 
     Eab
@@ -60,8 +60,8 @@ function two_term(i, j, t, KAB, PA, PB, p, q, cache=nothing)
     # E    = ----- | i E      + j E      |   for t > 0
     #  t      2pt  \    t-1        t-1   /
     
-    Eab = (expansion(i-1, j,   t-1, KAB, PA, PB, p, q, cache) * i .+
-           expansion(i,   j-1, t-1, KAB, PA, PB, p, q, cache) * j) .* (q / t)
+    Eab = (expansion(i-1, j,   t-1, KAB, PA, PB, p, q, cache) * i +
+           expansion(i,   j-1, t-1, KAB, PA, PB, p, q, cache) * j) * (q / t)
 
     Eab
 end
@@ -72,7 +72,7 @@ function order_dump_i(i, j, t, KAB, PA, PB, p, q, cache=nothing)
     # E    = | ----- |   |   | E
     #  t     \  2*p  /   \ t /  0
 
-    Eab = expansion(i-t, 0, 0, KAB, PA, PB, p, q, cache) .* q.^t * binomial(i, t)
+    Eab = expansion(i-t, 0, 0, KAB, PA, PB, p, q, cache) * q^t * binomial(i, t)
 
     Eab
 end
@@ -83,7 +83,7 @@ function order_dump_j(i, j, t, KAB, PA, PB, p, q, cache=nothing)
     # E    = | ----- |   |   | E
     #  t     \  2*p  /   \ t /  0
 
-    Eab = expansion(0, j-t, 0, KAB, PA, PB, p, q, cache) .* q.^t * binomial(j, t)
+    Eab = expansion(0, j-t, 0, KAB, PA, PB, p, q, cache) * q^t * binomial(j, t)
 
     Eab
 end
@@ -94,9 +94,9 @@ function obara_saika_i(i, j, t, KAB, PA, PB, p, q, cache=nothing)
     # E    = X   E      + ----- | (i-1) E      + j E        + E      |
     #  t      PA  t        2*p  \        t          t          t-1   /
 
-    Eab = expansion(i-1, j,   t,   KAB, PA, PB, p, q, cache) .* PA .+ q .* (
-          expansion(i-2, j,   t,   KAB, PA, PB, p, q, cache) * (i-1) .+
-          expansion(i-1, j-1, t,   KAB, PA, PB, p, q, cache) * j .+
+    Eab = expansion(i-1, j,   t,   KAB, PA, PB, p, q, cache) * PA + q * (
+          expansion(i-2, j,   t,   KAB, PA, PB, p, q, cache) * (i-1) +
+          expansion(i-1, j-1, t,   KAB, PA, PB, p, q, cache) * j +
           expansion(i-1, j,   t-1, KAB, PA, PB, p, q, cache)
     )
 
@@ -109,9 +109,9 @@ function obara_saika_j(i, j, t, KAB, PA, PB, p, q, cache=nothing)
     # E    = X   E      + ----- | i E        + (j-1) E      + E      |
     #  t      PB  t        2*p  \    t                t        t-1   /
     
-    Eab = expansion(i,   j-1, t,   KAB, PA, PB, p, q, cache) .* PB .+ q .* (
-          expansion(i-1, j-1, t,   KAB, PA, PB, p, q, cache) * i .+
-          expansion(i,   j-2, t,   KAB, PA, PB, p, q, cache) * (j-1) .+
+    Eab = expansion(i,   j-1, t,   KAB, PA, PB, p, q, cache) * PB + q * (
+          expansion(i-1, j-1, t,   KAB, PA, PB, p, q, cache) * i +
+          expansion(i,   j-2, t,   KAB, PA, PB, p, q, cache) * (j-1) +
           expansion(i,   j-1, t-1, KAB, PA, PB, p, q, cache)
     )
 

@@ -1,7 +1,5 @@
 # Compute the nuclear repulsion integrals
 
-using Tullio
-
 include("gto.jl")
 include("expansion.jl")
 include("boys.jl")
