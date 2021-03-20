@@ -4,7 +4,14 @@
 # FnT::AbstractVector     # Boys function values with (-2p)^n factor
 
 
-function base(t, u, v, n, PC, FnT)
+function base(
+        t::Int64, 
+        u::Int64, 
+        v::Int64, 
+        n::Int64, 
+        PC::Vector{Float64}, 
+        FnT::Vector{Float64},
+)
     #  n             n
     # R      = (-2 p)  F (T)
     #  0,0,0            n
@@ -13,7 +20,14 @@ function base(t, u, v, n, PC, FnT)
 end
 
 
-function oob(t, u, v, n, PC, FnT)
+function oob(
+        t::Int64, 
+        u::Int64, 
+        v::Int64, 
+        n::Int64, 
+        PC::Vector{Float64}, 
+        FnT::Vector{Float64},
+)
     #  n       
     # R      = 0.0  if t<0 or u<0 or v<0
     #  t,u,v   
@@ -22,7 +36,14 @@ function oob(t, u, v, n, PC, FnT)
 end
 
 
-function vertical_t(t, u, v, n, PC, FnT)
+function vertical_t(
+        t::Int64, 
+        u::Int64, 
+        v::Int64, 
+        n::Int64, 
+        PC::Vector{Float64}, 
+        FnT::Vector{Float64},
+)
     #  n              n+1            n+1
     # R      = (t-1) R        + X   R
     #  t,u,v          t-2,u,v    PC  t-1,u,v
@@ -34,7 +55,14 @@ function vertical_t(t, u, v, n, PC, FnT)
 end
 
 
-function vertical_u(t, u, v, n, PC, FnT)
+function vertical_u(
+        t::Int64, 
+        u::Int64, 
+        v::Int64, 
+        n::Int64, 
+        PC::Vector{Float64}, 
+        FnT::Vector{Float64},
+)
     #  n              n+1            n+1
     # R      = (u-1) R        + Y   R
     #  t,u,v          t,u-2,v    PC  t,u-1,v
@@ -46,7 +74,14 @@ function vertical_u(t, u, v, n, PC, FnT)
 end
 
 
-function vertical_v(t, u, v, n, PC, FnT)
+function vertical_v(
+        t::Int64, 
+        u::Int64, 
+        v::Int64, 
+        n::Int64, 
+        PC::Vector{Float64}, 
+        FnT::Vector{Float64},
+)
     #  n              n+1            n+1
     # R      = (v-1) R        + Z   R
     #  t,u,v          t,u,v-2    PC  t,u,v-1
@@ -58,7 +93,14 @@ function vertical_v(t, u, v, n, PC, FnT)
 end
 
 
-function hermite(t, u, v, n, PC, FnT)
+function hermite(
+        t::Int64, 
+        u::Int64, 
+        v::Int64, 
+        n::Int64, 
+        PC::Vector{Float64}, 
+        FnT::Vector{Float64},
+)
     # Default path for computing terms.
 
     if (t < 0) || (u < 0) || (v < 0)

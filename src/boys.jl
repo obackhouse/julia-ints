@@ -4,7 +4,7 @@ include("boys_lookup.jl")
 include("utils.jl")
 
 
-function boys_long(n, T)
+function boys_long(n::Int64, T::Float64)
     # Compute the Boys function Fn(T) with a long-range approximation
 
     fac = factorial_2(2*n-1)
@@ -16,13 +16,13 @@ function boys_long(n, T)
 end
 
 
-function boys(n, T)
+function boys(n::Int64, T::Float64)
     # Compute the Boys function Fn(T)
 
     if T < BOYS_TZERO
         FnT = 1.0 / (2 * n + 1)
     elseif T < BOYS_LONG_RANGE_TMAX
-        idx = round(Integer, T * BOYS_RESOLUTION)
+        idx = round(Int64, T * BOYS_RESOLUTION)
         
         dT = (idx - T * BOYS_RESOLUTION) * (1.0 / BOYS_RESOLUTION)
         fac = 1.0
@@ -40,7 +40,7 @@ function boys(n, T)
 end
 
 
-function boys_array!(nmax, T, out::AbstractVector)
+function boys_array!(nmax::Int64, T::Float64, out::AbstractVector{Float64})
     # Populate an array with the values of the Boys function Fn(T) up
     # to order nmax
     
@@ -54,7 +54,7 @@ function boys_array!(nmax, T, out::AbstractVector)
         end
     else
         if T < BOYS_LONG_RANGE_TMAX
-            idx = round(Integer, T * BOYS_RESOLUTION)
+            idx = round(Int64, T * BOYS_RESOLUTION)
             out[nmax+1] = boys_fn_data[nmax+1][idx+1]
 
             dT = (idx - T * BOYS_RESOLUTION) / BOYS_RESOLUTION
