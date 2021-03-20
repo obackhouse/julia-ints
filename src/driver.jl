@@ -3,6 +3,7 @@
 include("int1e_ovlp.jl")
 include("int1e_kin.jl")
 include("int1e_nuc.jl")
+include("int2e.jl")
 
 
 @doc """
@@ -34,6 +35,9 @@ function _get_driver_info(int::String, basis::Basis)
     elseif int == "int1e_nuc"
         fint = _int1e_nuc_matrix
         shape = (nao, nao)
+    elseif int == "int2e"
+        fint = _int2e_matrix
+        shape = (nao, nao, nao, nao)
     else
         throw(DomainError(int, "does not support " * int))
     end
