@@ -22,7 +22,11 @@ function oob(t, u, v, n, PC, FnT)
     # R      = 0.0  if t<0 or u<0 or v<0
     #  t,u,v   
 
-    Rtuv = zeros(size(PC)[1], size(PC)[2])
+    if ndims(PC) == 3
+        Rtuv = zero(view(PC, :, :, 1))
+    else
+        Rtuv = 0.0
+    end
 
     Rtuv
 end
