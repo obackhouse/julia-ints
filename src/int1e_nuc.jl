@@ -1,6 +1,5 @@
 # Compute the nuclear repulsion integrals
 
-using LinearAlgebra
 using Tullio
 
 include("gto.jl")
