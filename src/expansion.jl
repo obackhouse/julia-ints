@@ -41,7 +41,7 @@ function oob(
     # E    = 0.0  if t<0 or i<0 or j<0 or t>(i+j)
     #  t
     
-    0.0
+    zero(KAB)
 end
 
 

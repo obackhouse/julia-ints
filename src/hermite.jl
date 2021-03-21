@@ -32,7 +32,7 @@ function oob(
     # R      = 0.0  if t<0 or u<0 or v<0
     #  t,u,v   
 
-    0.0
+    zero(FnT[1])
 end
 
 
