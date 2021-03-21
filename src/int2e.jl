@@ -54,6 +54,13 @@ function _int2e_integral(ab::ContractedGaussianPair, cd::ContractedGaussianPair,
     μ2 = ones(Labcd+1)
     FnT = zeros(Labcd+1)
 
+    Et = Vector{Float64}(undef, la+lb+1)
+    Eu = Vector{Float64}(undef, ma+mb+1)
+    Ev = Vector{Float64}(undef, na+nb+1)
+    Ew = Vector{Float64}(undef, lc+ld+1)
+    Ex = Vector{Float64}(undef, mc+md+1)
+    Ey = Vector{Float64}(undef, nc+nd+1)
+
     for i = 1:ab.a.size
         for j = 1:ab.b.size
             for k = 1:cd.a.size
@@ -66,9 +73,6 @@ function _int2e_integral(ab::ContractedGaussianPair, cd::ContractedGaussianPair,
                     μ = p_times_q / p_plus_q
                     T = μ * sum(PQ .* PQ)
 
-                    fill!(μ2, 1.0)
-                    fill!(FnT, 0.0)
-
                     for n in 2:Labcd+1
                         μ2[n] = μ2[n-1] * (-2.0 * μ)
                     end
@@ -76,88 +80,70 @@ function _int2e_integral(ab::ContractedGaussianPair, cd::ContractedGaussianPair,
                     boys_array!(Labcd, T, FnT)
                     FnT .= FnT .* μ2
 
-                    if with_cache
-                        cache_t = Dict()
-                        cache_u = Dict()
-                        cache_v = Dict()
-                        cache_w = Dict()
-                        cache_x = Dict()
-                        cache_y = Dict()
-                    else
-                        cache_t = cache_u = cache_v = cache_w = cache_x = cache_y = nothing
-                    end
+                    Et = populate_expansion(
+                            la, lb, la+lb,
+                            ab.KAB[i,j,1],
+                            ab.PA[i,j,1],
+                            ab.PB[i,j,1],
+                            ab.p[i,j],
+                            ab.q[i,j],
+                            Et,
+                    )
+                    Eu = populate_expansion(
+                            ma, mb, ma+mb,
+                            ab.KAB[i,j,2],
+                            ab.PA[i,j,2],
+                            ab.PB[i,j,2],
+                            ab.p[i,j],
+                            ab.q[i,j],
+                            Eu,
+                    )
+                    Ev = populate_expansion(
+                            na, nb, na+nb,
+                            ab.KAB[i,j,3],
+                            ab.PA[i,j,3],
+                            ab.PB[i,j,3],
+                            ab.p[i,j],
+                            ab.q[i,j],
+                            Ev,
+                    )
+                    Ew = populate_expansion(
+                            lc, ld, lc+ld,
+                            cd.KAB[k,l,1],
+                            cd.PA[k,l,1],
+                            cd.PB[k,l,1],
+                            cd.p[k,l],
+                            cd.q[k,l],
+                            Ew,
+                    )
+                    Ex = populate_expansion(
+                            mc, md, mc+md,
+                            cd.KAB[k,l,2],
+                            cd.PA[k,l,2],
+                            cd.PB[k,l,2],
+                            cd.p[k,l],
+                            cd.q[k,l],
+                            Ex,
+                    )
+                    Ey = populate_expansion(
+                            nc, nd, nc+nd,
+                            cd.KAB[k,l,3],
+                            cd.PA[k,l,3],
+                            cd.PB[k,l,3],
+                            cd.p[k,l],
+                            cd.q[k,l],
+                            Ey,
+                    )
 
                     for w = 0:lc+ld
-                        Ew = expansion(
-                                lc, ld, w,
-                                cd.KAB[k,l,1],
-                                cd.PA[k,l,1],
-                                cd.PB[k,l,1],
-                                cd.p[k,l], 
-                                cd.q[k,l],
-                                cache_w,
-                        )
-
                         for x = 0:mc+md
-                            Ex = expansion(
-                                    mc, md, x,
-                                    cd.KAB[k,l,2],
-                                    cd.PA[k,l,2],
-                                    cd.PB[k,l,2],
-                                    cd.p[k,l], 
-                                    cd.q[k,l],
-                                    cache_x,
-                            )
-                            Ewx = Ew * Ex
-
                             for y = 0:nc+nd
-                                Ey = expansion(
-                                        nc, nd, y,
-                                        cd.KAB[k,l,3],
-                                        cd.PA[k,l,3],
-                                        cd.PB[k,l,3],
-                                        cd.p[k,l], 
-                                        cd.q[k,l],
-                                        cache_y,
-                                )
-                                Ewxy = Ewx * Ey * ((-1)^(w+x+y))
-
+                                Ewxy = Ew[w+1] * Ex[x+1] * Ey[y+1] * ((-1)^(w+x+y))
                                 for t = 0:la+lb
-                                    Et = expansion(
-                                            la, lb, t,
-                                            ab.KAB[i,j,1],
-                                            ab.PA[i,j,1],
-                                            ab.PB[i,j,1],
-                                            ab.p[i,j],
-                                            ab.q[i,j],
-                                            cache_t,
-                                    )
-                                    Etwxy = Et * Ewxy
-
                                     for u = 0:ma+mb
-                                        Eu = expansion(
-                                                ma, mb, u,
-                                                ab.KAB[i,j,2],
-                                                ab.PA[i,j,2],
-                                                ab.PB[i,j,2],
-                                                ab.p[i,j],
-                                                ab.q[i,j],
-                                                cache_u,
-                                        )
-                                        Etuwxy = Etwxy * Eu
-
                                         for v = 0:na+nb
-                                            Ev = expansion(
-                                                    na, nb, v,
-                                                    ab.KAB[i,j,3],
-                                                    ab.PA[i,j,3],
-                                                    ab.PB[i,j,3],
-                                                    ab.p[i,j],
-                                                    ab.q[i,j],
-                                                    cache_v,
-                                            )
                                             Rtuvwxy = hermite(t+w, u+x, v+y, 0, PQ, FnT)
-                                            vee_ij += Etuwxy * Ev * Rtuvwxy
+                                            vee_ij += Et[t+1] * Eu[u+1] * Ev[v+1] * Ewxy * Rtuvwxy
                                         end
                                     end
                                 end
