@@ -13,7 +13,7 @@ abstract type Gaussian end
 struct PrimitiveGaussian <: Gaussian
     α::Float64            # exponent
     c::Float64            # coefficient
-    lmn::Vector{Integer}  # angular momenta
+    lmn::Vector{Int64}  # angular momenta
     A::Vector{Float64}    # coords
     N::Float64            # normalisation
 end
@@ -22,16 +22,16 @@ end
 struct ContractedGaussian <: Gaussian
     α::Vector{Float64}    # exponent
     c::Vector{Float64}    # coefficient
-    lmn::Vector{Integer}  # angular momenta
+    lmn::Vector{Int64}  # angular momenta
     A::Vector{Float64}    # coords
     N::Vector{Float64}    # normalisation
-    size::Integer         # number of primitives
+    size::Int64         # number of primitives
 end
 
 
 struct ContractedGaussianPair <: Gaussian
-    i::Integer              # index of function a in basis
-    j::Integer              # index of function b in basis
+    i::Int64              # index of function a in basis
+    j::Int64              # index of function b in basis
     a::ContractedGaussian   # contracted gaussian a
     b::ContractedGaussian   # contracted gaussian b
     α::Array{Float64}       # exponent of a
@@ -52,7 +52,7 @@ struct Basis
     pairs::Vector{ContractedGaussianPair}
     atoms::Vector{Tuple{String, Vector}}
     charges::Vector{Float64}
-    size::Integer
+    size::Int64
     name::String
     dict::AbstractDict
 end
@@ -82,7 +82,7 @@ function contract(primitives::AbstractVector{PrimitiveGaussian})
 end
 
 
-function normalise(α::Vector{Float64}, lmn::Vector{Integer})
+function normalise(α::Vector{Float64}, lmn::Vector{Int64})
     # Normalise a primitive gaussian and set the respective const 
     
     l, m, n = lmn
@@ -153,7 +153,7 @@ function get_lmn(ang)
     # Take an angular momentum char i.e. S, P and return a vector
     # of vectors with each possible l,m,n angular momenta
 
-    lmn = Vector{Vector{Integer}}()
+    lmn = Vector{Vector{Int64}}()
     L = findall(x -> x == ang, ang_keys)[1] - 1
 
     for l = 0:L
