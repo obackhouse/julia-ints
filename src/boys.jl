@@ -44,9 +44,9 @@ function boys_array!(nmax::Int64, T::Float64, out::AbstractVector{Float64})
     # Populate an array with the values of the Boys function Fn(T) up
     # to order nmax
     
-    @assert nmax >= 0
-    @assert T >= 0
-    @assert nmax <= BOYS_MAX_DATA
+    #@assert nmax >= 0
+    #@assert T >= 0
+    #@assert nmax <= BOYS_MAX_DATA
 
     if T < BOYS_TZERO
         for n = 0:nmax
