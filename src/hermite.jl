@@ -117,3 +117,27 @@ function hermite(
 
     Rtuv
 end
+
+
+function populate_hermite(
+        tmax::Int64,
+        umax::Int64,
+        vmax::Int64,
+        PC::Vector{Float64}, 
+        FnT::Vector{Float64},
+        out::Array{Float64, 3},
+)
+    # Populate an array with hermite coefficients for n = 0 and
+    # t = 0 → tmax, u = 0 → umax and v = 0 → vmax
+
+    #TODO
+    for t = 0:tmax
+        for u = 0:umax
+            for v = 0:vmax
+                out[t+1,u+1,v+1] = hermite(t, u, v, 0, PC, FnT)
+            end
+        end
+    end
+
+    out
+end

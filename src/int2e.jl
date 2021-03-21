@@ -43,8 +43,10 @@ function _int2e_integral(ab::ContractedGaussianPair, cd::ContractedGaussianPair,
     lb, mb, nb = ab.b.lmn
     lc, mc, nc = cd.a.lmn
     ld, md, nd = cd.b.lmn
-    Lab = la + ma + na + lb + mb + nb
-    Lcd = lc + mc + nc + ld + md + nd
+    lab, mab, nab = la+lb, ma+mb, na+nb
+    lcd, mcd, ncd = lc+ld, mc+md, nc+nd
+    Lab = lab + mab + nab
+    Lcd = lcd + mcd + ncd
     Labcd = Lab + Lcd
 
     if Labcd == 0
@@ -54,12 +56,13 @@ function _int2e_integral(ab::ContractedGaussianPair, cd::ContractedGaussianPair,
     μ2 = ones(Labcd+1)
     FnT = zeros(Labcd+1)
 
-    Et = Vector{Float64}(undef, la+lb+1)
-    Eu = Vector{Float64}(undef, ma+mb+1)
-    Ev = Vector{Float64}(undef, na+nb+1)
-    Ew = Vector{Float64}(undef, lc+ld+1)
-    Ex = Vector{Float64}(undef, mc+md+1)
-    Ey = Vector{Float64}(undef, nc+nd+1)
+    Et = Vector{Float64}(undef, lab+1)
+    Eu = Vector{Float64}(undef, mab+1)
+    Ev = Vector{Float64}(undef, nab+1)
+    Ew = Vector{Float64}(undef, lcd+1)
+    Ex = Vector{Float64}(undef, mcd+1)
+    Ey = Vector{Float64}(undef, ncd+1)
+    Rtuvwxy = Array{Float64, 3}(undef, lab+lcd+1, mab+mcd+1, nab+ncd+1)
 
     for i = 1:ab.a.size
         for j = 1:ab.b.size
@@ -81,7 +84,7 @@ function _int2e_integral(ab::ContractedGaussianPair, cd::ContractedGaussianPair,
                     FnT .= FnT .* μ2
 
                     Et = populate_expansion(
-                            la, lb, la+lb,
+                            la, lb, lab,
                             ab.KAB[i,j,1],
                             ab.PA[i,j,1],
                             ab.PB[i,j,1],
@@ -90,7 +93,7 @@ function _int2e_integral(ab::ContractedGaussianPair, cd::ContractedGaussianPair,
                             Et,
                     )
                     Eu = populate_expansion(
-                            ma, mb, ma+mb,
+                            ma, mb, mab,
                             ab.KAB[i,j,2],
                             ab.PA[i,j,2],
                             ab.PB[i,j,2],
@@ -99,7 +102,7 @@ function _int2e_integral(ab::ContractedGaussianPair, cd::ContractedGaussianPair,
                             Eu,
                     )
                     Ev = populate_expansion(
-                            na, nb, na+nb,
+                            na, nb, nab,
                             ab.KAB[i,j,3],
                             ab.PA[i,j,3],
                             ab.PB[i,j,3],
@@ -108,7 +111,7 @@ function _int2e_integral(ab::ContractedGaussianPair, cd::ContractedGaussianPair,
                             Ev,
                     )
                     Ew = populate_expansion(
-                            lc, ld, lc+ld,
+                            lc, ld, lcd,
                             cd.KAB[k,l,1],
                             cd.PA[k,l,1],
                             cd.PB[k,l,1],
@@ -117,7 +120,7 @@ function _int2e_integral(ab::ContractedGaussianPair, cd::ContractedGaussianPair,
                             Ew,
                     )
                     Ex = populate_expansion(
-                            mc, md, mc+md,
+                            mc, md, mcd,
                             cd.KAB[k,l,2],
                             cd.PA[k,l,2],
                             cd.PB[k,l,2],
@@ -126,7 +129,7 @@ function _int2e_integral(ab::ContractedGaussianPair, cd::ContractedGaussianPair,
                             Ex,
                     )
                     Ey = populate_expansion(
-                            nc, nd, nc+nd,
+                            nc, nd, ncd,
                             cd.KAB[k,l,3],
                             cd.PA[k,l,3],
                             cd.PB[k,l,3],
@@ -134,16 +137,24 @@ function _int2e_integral(ab::ContractedGaussianPair, cd::ContractedGaussianPair,
                             cd.q[k,l],
                             Ey,
                     )
+                    Rtuvwxy = populate_hermite(
+                            lab+lcd,
+                            mab+mcd,
+                            nab+ncd,
+                            PQ,
+                            FnT,
+                            Rtuvwxy,
+                    )
 
-                    for w = 0:lc+ld
-                        for x = 0:mc+md
-                            for y = 0:nc+nd
+                    for w = 0:lcd
+                        for x = 0:mcd
+                            for y = 0:ncd
                                 Ewxy = Ew[w+1] * Ex[x+1] * Ey[y+1] * ((-1)^(w+x+y))
-                                for t = 0:la+lb
-                                    for u = 0:ma+mb
-                                        for v = 0:na+nb
-                                            Rtuvwxy = hermite(t+w, u+x, v+y, 0, PQ, FnT)
-                                            vee_ij += Et[t+1] * Eu[u+1] * Ev[v+1] * Ewxy * Rtuvwxy
+                                for t = 0:lab
+                                    for u = 0:mab
+                                        for v = 0:nab
+                                            vee_ij += Et[t+1] * Eu[u+1] * Ev[v+1] * 
+                                                      Ewxy * Rtuvwxy[t+w+1,u+x+1,v+y+1]
                                         end
                                     end
                                 end
