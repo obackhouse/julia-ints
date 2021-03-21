@@ -278,21 +278,18 @@ function expansion(
         PB::Float64, 
         p::Float64, 
         q::Float64, 
-        cache::Dict{Tuple{Int64, Int64, Int64}, Float64},
+        cache::Dict{NTuple{3, Int64}, Float64},
 )
     # Driver function for expansion coefficients with caching
 
-    if cache != nothing
-        if haskey(cache, (i,j,t))
-            return cache[(i,j,t)]
-        end
+    key = (i, j, t)
+    if haskey(cache, key)
+        return cache[key]
     end
 
     Eab = expansion_os(i, j, t, KAB, PA, PB, p, q)
 
-    if cache != nothing
-        push!(cache, (i,j,t) => Eab)
-    end
+    push!(cache, key => Eab)
 
     Eab
 end
@@ -311,9 +308,15 @@ function populate_expansion(
 )
     # Populate array with expansion coefficients for t = 0 → tmax
 
-    #TODO
+    if (i+j+tmax) > 5  #TODO: I assume this is good for high ang mom?
+        cache = Dict{NTuple{3, Int64}, Float64}()
+    else
+        cache = nothing
+    end
+
+    #TODO more efficient path
     for t = 0:tmax
-        out[t+1] = expansion(i, j, t, KAB, PA, PB, p, q)
+        out[t+1] = expansion(i, j, t, KAB, PA, PB, p, q, cache)
     end
 
     out

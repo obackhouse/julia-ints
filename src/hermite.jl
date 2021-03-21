@@ -93,7 +93,7 @@ function vertical_v(
 end
 
 
-function hermite(
+function hermite_mmd(
         t::Int64, 
         u::Int64, 
         v::Int64, 
@@ -119,6 +119,45 @@ function hermite(
 end
 
 
+function hermite(
+        t::Int64, 
+        u::Int64, 
+        v::Int64, 
+        n::Int64, 
+        PC::Vector{Float64}, 
+        FnT::Vector{Float64},
+        cache::Nothing=nothing,
+)
+    # Driver function for hermite terms
+
+    hermite_mmd(t, u, v, n, PC, FnT)
+end
+
+
+function hermite(
+        t::Int64, 
+        u::Int64, 
+        v::Int64, 
+        n::Int64, 
+        PC::Vector{Float64}, 
+        FnT::Vector{Float64},
+        cache::Dict{NTuple{4, Int64}, Float64},
+)
+    # Driver function for hermite terms with caching
+
+    key = (t, u, v, n)
+    if haskey(cache, key)
+        return cache[key]
+    end
+
+    Rtuv = hermite_mmd(t, u, v, n, PC, FnT)
+
+    push!(cache, key => Rtuv)
+
+    Rtuv
+end
+
+
 function populate_hermite(
         tmax::Int64,
         umax::Int64,
@@ -130,11 +169,17 @@ function populate_hermite(
     # Populate an array with hermite coefficients for n = 0 and
     # t = 0 → tmax, u = 0 → umax and v = 0 → vmax
 
-    #TODO
+    if (tmax+umax+vmax) > 3  #TODO: I assume this is good for high ang mom?
+        cache = Dict{NTuple{4, Int64}, Float64}()
+    else
+        cache = nothing
+    end
+
+    #TODO more efficient path
     for t = 0:tmax
         for u = 0:umax
             for v = 0:vmax
-                out[t+1,u+1,v+1] = hermite(t, u, v, 0, PC, FnT)
+                out[t+1,u+1,v+1] = hermite(t, u, v, 0, PC, FnT, cache)
             end
         end
     end
