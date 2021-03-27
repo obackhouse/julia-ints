@@ -83,60 +83,6 @@ function _int2e_integral(ab::ContractedGaussianPair, cd::ContractedGaussianPair,
                     boys_array!(Labcd, T, FnT)
                     FnT .= FnT .* μ2
 
-                    Et = populate_expansion(
-                            la, lb, lab,
-                            ab.KAB[i,j,1],
-                            ab.PA[i,j,1],
-                            ab.PB[i,j,1],
-                            ab.p[i,j],
-                            ab.q[i,j],
-                            Et,
-                    )
-                    Eu = populate_expansion(
-                            ma, mb, mab,
-                            ab.KAB[i,j,2],
-                            ab.PA[i,j,2],
-                            ab.PB[i,j,2],
-                            ab.p[i,j],
-                            ab.q[i,j],
-                            Eu,
-                    )
-                    Ev = populate_expansion(
-                            na, nb, nab,
-                            ab.KAB[i,j,3],
-                            ab.PA[i,j,3],
-                            ab.PB[i,j,3],
-                            ab.p[i,j],
-                            ab.q[i,j],
-                            Ev,
-                    )
-                    Ew = populate_expansion(
-                            lc, ld, lcd,
-                            cd.KAB[k,l,1],
-                            cd.PA[k,l,1],
-                            cd.PB[k,l,1],
-                            cd.p[k,l],
-                            cd.q[k,l],
-                            Ew,
-                    )
-                    Ex = populate_expansion(
-                            mc, md, mcd,
-                            cd.KAB[k,l,2],
-                            cd.PA[k,l,2],
-                            cd.PB[k,l,2],
-                            cd.p[k,l],
-                            cd.q[k,l],
-                            Ex,
-                    )
-                    Ey = populate_expansion(
-                            nc, nd, ncd,
-                            cd.KAB[k,l,3],
-                            cd.PA[k,l,3],
-                            cd.PB[k,l,3],
-                            cd.p[k,l],
-                            cd.q[k,l],
-                            Ey,
-                    )
                     Rtuvwxy = populate_hermite(
                             lab+lcd,
                             mab+mcd,
@@ -149,12 +95,19 @@ function _int2e_integral(ab::ContractedGaussianPair, cd::ContractedGaussianPair,
                     for w = 0:lcd
                         for x = 0:mcd
                             for y = 0:ncd
-                                Ewxy = Ew[w+1] * Ex[x+1] * Ey[y+1] * ((-1)^(w+x+y))
+                                Ewxy = ((-1)^(w+x+y)) *
+                                       cd.EABx[w+1,k,l] *
+                                       cd.EABy[x+1,k,l] *
+                                       cd.EABz[y+1,k,l]
+
                                 for t = 0:lab
                                     for u = 0:mab
                                         for v = 0:nab
-                                            vee_ij += Et[t+1] * Eu[u+1] * Ev[v+1] * 
-                                                      Ewxy * Rtuvwxy[t+w+1,u+x+1,v+y+1]
+                                            vee_ij += Ewxy *
+                                                      ab.EABx[t+1,i,j] *
+                                                      ab.EABy[u+1,i,j] *
+                                                      ab.EABz[v+1,i,j] *
+                                                      Rtuvwxy[t+w+1,u+x+1,v+y+1]
                                         end
                                     end
                                 end

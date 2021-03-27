@@ -304,7 +304,7 @@ function populate_expansion(
         PB::Float64, 
         p::Float64, 
         q::Float64, 
-        out::Vector{Float64},
+        out::AbstractArray{Float64},
 )
     # Populate array with expansion coefficients for t = 0 → tmax
 

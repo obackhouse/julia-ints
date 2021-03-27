@@ -1,7 +1,9 @@
 # Basis functions
+#FIXME: last element in basis set file is not being parsed
 
 include("utils.jl")
 include("ptable.jl")
+include("expansion.jl")
 
 
 ang_keys = ["S", "P", "D", "F", "G", "H", "I", "J", "K"]
@@ -11,39 +13,42 @@ abstract type Gaussian end
 
 
 struct PrimitiveGaussian <: Gaussian
-    α::Float64            # exponent
-    c::Float64            # coefficient
+    α::Float64          # exponent
+    c::Float64          # coefficient
     lmn::Vector{Int64}  # angular momenta
-    A::Vector{Float64}    # coords
-    N::Float64            # normalisation
+    A::Vector{Float64}  # coords
+    N::Float64          # normalisation
 end
 
 
 struct ContractedGaussian <: Gaussian
-    α::Vector{Float64}    # exponent
-    c::Vector{Float64}    # coefficient
+    α::Vector{Float64}  # exponent
+    c::Vector{Float64}  # coefficient
     lmn::Vector{Int64}  # angular momenta
-    A::Vector{Float64}    # coords
-    N::Vector{Float64}    # normalisation
+    A::Vector{Float64}  # coords
+    N::Vector{Float64}  # normalisation
     size::Int64         # number of primitives
 end
 
 
 struct ContractedGaussianPair <: Gaussian
-    i::Int64              # index of function a in basis
-    j::Int64              # index of function b in basis
+    i::Int64                # index of function a in basis
+    j::Int64                # index of function b in basis
     a::ContractedGaussian   # contracted gaussian a
     b::ContractedGaussian   # contracted gaussian b
     α::Array{Float64}       # exponent of a
     β::Array{Float64}       # exponent of b
-    p::Array{Float64, 2}    # α+β
-    q::Array{Float64, 2}    # 1/(2(α+β))
-    D::Array{Float64, 2}    # product c and N of a and b
-    P::Array{Float64, 3}    # gaussian product centre
-    PA::Array{Float64, 3}   # P-A coordinates
-    PB::Array{Float64, 3}   # P-B coordinates
-    AB::Array{Float64, 3}   # A-B coordinates
-    KAB::Array{Float64, 3}  # exponential term
+    p::Array{Float64}       # α+β
+    q::Array{Float64}       # 1/(2(α+β))
+    D::Array{Float64}       # product c and N of a and b
+    P::Array{Float64}       # gaussian product centre
+    PA::Array{Float64}      # P-A coordinates
+    PB::Array{Float64}      # P-B coordinates
+    AB::Array{Float64}      # A-B coordinates
+    KAB::Array{Float64}     # exponential term
+    EABx::Array{Float64}    # expansion coefficients in x direction
+    EABy::Array{Float64}    # expansion coefficients in y direction
+    EABz::Array{Float64}    # expansion coefficients in z direction
 end
 
 
@@ -125,6 +130,9 @@ function build_pairs(gaussians::AbstractVector{ContractedGaussian})
             PB = Array{Float64}(undef, na, nb, 3)
             AB = Array{Float64}(undef, na, nb, 3)
             KAB = Array{Float64}(undef, na, nb, 3)
+            EABx = Array{Float64}(undef, a.lmn[1]+b.lmn[1]+1, na, nb)
+            EABy = Array{Float64}(undef, a.lmn[2]+b.lmn[2]+1, na, nb)
+            EABz = Array{Float64}(undef, a.lmn[3]+b.lmn[3]+1, na, nb)
 
             @views begin
                 for k = 1:na
@@ -135,12 +143,49 @@ function build_pairs(gaussians::AbstractVector{ContractedGaussian})
                         AB[k,l,:] .= A .- B
                         ζ = α[k] * β[l] / p[k,l]
                         KAB[k,l,:] .= exp.(-ζ .* AB[k,l,:].^2)
+
+                        populate_expansion(
+                               a.lmn[1],
+                               b.lmn[1],
+                               a.lmn[1]+b.lmn[1],
+                               KAB[k,l,1],
+                               PA[k,l,1],
+                               PB[k,l,1],
+                               p[k,l],
+                               q[k,l],
+                               view(EABx, :, k, l),
+                        )
+
+                        populate_expansion(
+                               a.lmn[2],
+                               b.lmn[2],
+                               a.lmn[2]+b.lmn[2],
+                               KAB[k,l,2],
+                               PA[k,l,2],
+                               PB[k,l,2],
+                               p[k,l],
+                               q[k,l],
+                               view(EABy, :, k, l),
+                        )
+
+                        populate_expansion(
+                               a.lmn[3],
+                               b.lmn[3],
+                               a.lmn[3]+b.lmn[3],
+                               KAB[k,l,3],
+                               PA[k,l,3],
+                               PB[k,l,3],
+                               p[k,l],
+                               q[k,l],
+                               view(EABz, :, k, l),
+                        )
                     end
                 end
             end
 
             pair = ContractedGaussianPair(i, j, a, b, α, β, p, q,
-                                          D, P, PA, PB, AB, KAB)
+                                          D, P, PA, PB, AB, KAB,
+                                          EABx, EABy, EABz)
             push!(pairs, pair)
         end
     end

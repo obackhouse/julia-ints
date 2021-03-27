@@ -12,15 +12,17 @@ function _int1e_nuc_integral(ab::ContractedGaussianPair, atoms::Vector{Tuple{Str
     vne = 0.0
     la, ma, na = ab.a.lmn
     lb, mb, nb = ab.b.lmn
+    lab, mab, nab = la+lb, ma+mb, na+nb
     Lab = la + ma + na + lb + mb + nb
+    Rtuv = Array{Float64, 3}(undef, lab+1, mab+1, nab+1)
 
     for i = 1:ab.a.size
         for j = 1:ab.b.size
             vne_ij = 0.0
-            mtp = ones(Lab+1)
+            p2 = ones(Lab+1)
 
             for n in 2:Lab+1
-                mtp[n] = mtp[n-1] * (-2.0 * ab.p[i,j])
+                p2[n] = p2[n-1] * (-2.0 * ab.p[i,j])
             end
             
             for k = 1:length(atoms)
@@ -29,42 +31,21 @@ function _int1e_nuc_integral(ab::ContractedGaussianPair, atoms::Vector{Tuple{Str
                 T = ab.p[i,j] * sum(PC .* PC)
 
                 boys_array!(Lab, T, FnT)
-                FnT .= FnT .* mtp
+                FnT .= FnT .* p2
 
-                @views begin
-                    for t = 0:la+lb
-                        Et = expansion(
-                                la, lb, t, 
-                                ab.KAB[i,j,1],
-                                ab.PA[i,j,1],
-                                ab.PB[i,j,1],
-                                ab.p[i,j], 
-                                ab.q[i,j],
-                        )
+                Rtuv = populate_hermite(
+                        lab, mab, nab,
+                        PC, FnT, Rtuv,
+                )
 
-                        for u = 0:ma+mb
-                            Eu = expansion(
-                                    ma, mb, u, 
-                                    ab.KAB[i,j,2],
-                                    ab.PA[i,j,2],
-                                    ab.PB[i,j,2],
-                                    ab.p[i,j], 
-                                    ab.q[i,j],
-                            )
-
-                            for v = 0:na+nb
-                                Ev = expansion(
-                                        na, nb, v, 
-                                        ab.KAB[i,j,3],
-                                        ab.PA[i,j,3],
-                                        ab.PB[i,j,3],
-                                        ab.p[i,j], 
-                                        ab.q[i,j],
-                                )
-                                Rtuv = hermite(t, u, v, 0, PC, FnT)
-
-                                vne_ij += charges[k] * Et * Eu * Ev * Rtuv
-                            end
+                for t = 0:lab
+                    for u = 0:mab
+                        for v = 0:nab
+                            vne_ij += charges[k] *
+                                      ab.EABx[t+1,i,j] *
+                                      ab.EABy[u+1,i,j] *
+                                      ab.EABz[v+1,i,j] *
+                                      Rtuv[t+1,u+1,v+1]
                         end
                     end
                 end

@@ -14,30 +14,9 @@ function _int1e_kin_integral(ab::ContractedGaussianPair)
 
     for i = 1:ab.a.size
         for j = 1:ab.b.size
-            sx = expansion(
-                    la, lb, 0, 
-                    ab.KAB[i,j,1], 
-                    ab.PA[i,j,1], 
-                    ab.PB[i,j,1], 
-                    ab.p[i,j], 
-                    ab.q[i,j],
-            )
-            sy = expansion(
-                    ma, mb, 0, 
-                    ab.KAB[i,j,2], 
-                    ab.PA[i,j,2], 
-                    ab.PB[i,j,2], 
-                    ab.p[i,j], 
-                    ab.q[i,j],
-            )
-            sz = expansion(
-                    na, nb, 0, 
-                    ab.KAB[i,j,3], 
-                    ab.PA[i,j,3], 
-                    ab.PB[i,j,3], 
-                    ab.p[i,j], 
-                    ab.q[i,j],
-            )
+            sx = ab.EABx[1,i,j]
+            sy = ab.EABy[1,i,j]
+            sz = ab.EABz[1,i,j]
 
             tx = expansion(
                     la, lb+2, 0, 
